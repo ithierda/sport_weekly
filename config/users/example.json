@@ -1,0 +1,53 @@
+{
+    "name": "Baptiste",
+    "email": "ithier.da@gmail.com",
+    "sports": {
+        "football": {
+            "leagues": ["champions_league"],
+            "teams": ["Paris Saint-Germain"]
+        },
+        "rugby": {
+            "leagues": ["top14", "champions_cup", "six_nations", "sevens"],
+            "teams": ["France", "Stade Français", "Racing 92"]
+        },
+        "nba": {
+            "follow_league": true,
+            "players": ["Victor Wembanyama"]
+        },
+        "tennis": {
+            "events": ["grand_slam", "masters_1000"],
+            "players": ["Arthur Fils"]
+        },
+        "cycling": {
+            "events": ["world_tour", "monuments", "classics"],
+            "riders": ["Paul Seixas"]
+        },
+        "f1": {
+            "follow": true
+        },
+        "motogp": {
+            "follow": true
+        },
+        "biathlon": {
+            "events": ["world_cup", "ibu_cup"]
+        },
+        "ski_alpine": {
+            "events": ["world_cup"]
+        },
+        "sailing": {
+            "events": ["sailgp", "vendee_globe"]
+        },
+        "swimming": {
+            "events": ["world_championships"]
+        },
+        "athletics": {
+            "events": ["diamond_league", "world_championships"]
+        },
+        "trail": {
+            "events": ["utmb", "major_races"]
+        },
+        "olympics": {
+            "follow": true
+        }
+    }
+}
