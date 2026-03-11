@@ -3,12 +3,15 @@
 import logging
 from datetime import datetime
 from collections import defaultdict
+from zoneinfo import ZoneInfo
 
 from premailer import transform
 
 from src.fetch.espn import SportEvent
 
 logger = logging.getLogger(__name__)
+
+PARIS_TZ = ZoneInfo("Europe/Paris")
 
 # French day names
 JOURS = {
@@ -56,7 +59,7 @@ def _render_must_watch(events: list[SportEvent]) -> str:
     # Deduplicate and pick top 5 based on variety of sports
     seen_sports: dict[str, int] = {}
     top5: list[SportEvent] = []
-    # First pass: diversify sports
+    # First pass: diversify sports (max 2 per sport)
     for e in must:
         if len(top5) >= 5:
             break
@@ -64,6 +67,13 @@ def _render_must_watch(events: list[SportEvent]) -> str:
         if count < 2:
             top5.append(e)
             seen_sports[e.sport] = count + 1
+    # Second pass: fill up to 5 if needed
+    if len(top5) < 5:
+        for e in must:
+            if len(top5) >= 5:
+                break
+            if e not in top5:
+                top5.append(e)
 
     if not top5:
         return ""
@@ -305,14 +315,31 @@ def render_newsletter(
         for n in news[:10]:
             title = n.get("title", "")
             url = n.get("url", "")
+            pub = n.get("published", "")
+            # Format date
+            date_label = ""
+            if pub:
+                try:
+                    dt = datetime.fromisoformat(pub.replace("Z", "+00:00")).astimezone(PARIS_TZ)
+                    date_label = f'{dt.day} {MOIS.get(dt.month, "")} — {dt.strftime("%H:%M")}'
+                except (ValueError, TypeError):
+                    # Try RFC 2822 format (from RSS feeds)
+                    try:
+                        from email.utils import parsedate_to_datetime
+                        dt = parsedate_to_datetime(pub).astimezone(PARIS_TZ)
+                        date_label = f'{dt.day} {MOIS.get(dt.month, "")} — {dt.strftime("%H:%M")}'
+                    except Exception:
+                        date_label = pub[:16] if len(pub) > 16 else pub
+
+            date_html = f'<span style="font-size:11px; color:#999; margin-left:6px;">{date_label}</span>' if date_label else ''
             if url:
                 html += f"""
                 <div class="news-item">
-                    <a href="{url}">{title}</a>
+                    <a href="{url}">{title}</a>{date_html}
                 </div>"""
             elif title:
                 html += f"""
-                <div class="news-item">{title}</div>"""
+                <div class="news-item">{title}{date_html}</div>"""
         html += """
             </div>"""
 

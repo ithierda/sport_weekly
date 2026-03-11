@@ -75,4 +75,4 @@ def fetch_tennis(config: dict, date_range: str) -> list[SportEvent]:
 
 def fetch_tennis_news(config: dict) -> list[dict]:
     articles = espn.news("tennis", "atp", limit=5)
-    return [{"title": a.get("headline", ""), "url": a.get("links", {}).get("web", {}).get("href", "")} for a in articles]
+    return [{"title": a.get("headline", ""), "url": a.get("links", {}).get("web", {}).get("href", ""), "published": a.get("published", "")} for a in articles]

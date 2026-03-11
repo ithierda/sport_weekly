@@ -45,5 +45,5 @@ def fetch_nba_news(config: dict) -> list[dict]:
         title = a.get("headline", "")
         url = a.get("links", {}).get("web", {}).get("href", "")
         # Prioritize Wembanyama news
-        results.append({"title": title, "url": url, "priority": "wembanyama" in title.lower()})
+        results.append({"title": title, "url": url, "published": a.get("published", ""), "priority": "wembanyama" in title.lower()})
     return sorted(results, key=lambda x: x.get("priority", False), reverse=True)[:5]

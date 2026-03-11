@@ -54,31 +54,30 @@ def generate(prompt: str, max_tokens: int | None = None) -> str:
 
 
 def build_weekly_prompt(events_summary: str, news_summary: str, must_watch: str) -> str:
-    """Build the prompt for weekly newsletter AI commentary."""
-    return f"""TU ES UN JOURNALISTE SPORTIF avec le style Trashtalk / la verve de L'Équipe.
-Tu rédiges le résumé hebdomadaire d'une newsletter sportive multi-sports en FRANÇAIS.
+    """Build the prompt for a punchy weekly highlight for the newsletter."""
+    return f"""TU ES UN JOURNALISTE SPORTIF FRANÇAIS avec le style Trashtalk / la verve de L'Équipe.
+
+Ta mission : écrire UNE COURTE ACTU qui donne du peps à la semaine sportive.
+Cette actu doit mettre en avant UNE GROSSE CONFRONTATION du week-end.
 
 RÈGLES STRICTES :
-1. Écris en FRANÇAIS, avec un style percutant et divertissant.
-2. Utilise UNIQUEMENT les données fournies ci-dessous. NE FABRIQUE AUCUNE information.
-3. Pas d'emojis, pas de titres, pas de formatage, juste des paragraphes fluides.
-4. Commence directement dans le vif du sujet.
-5. Mets en avant les 5 événements à ne pas rater de la semaine avec du HYPE.
-6. Fais des transitions naturelles entre les sports.
-7. Sois insolent mais jamais méchant, factuel mais jamais ennuyeux.
-8. Si tu ne disposes pas d'assez de données sur un sport, mentionne-le brièvement ou ignore-le. 
-   Pas de données = pas d'invention.
-9. Intègre les actualités et tendances du moment.
-10. Termine par une phrase punch pour donner envie de suivre la semaine.
-11. Longueur : 800-1200 mots.
+1. Écris en FRANÇAIS.
+2. Utilise UNIQUEMENT les informations ci-dessous. N'invente rien.
+3. Choisis UN événement majeur (match, duel, rivalité, finale, choc historique).
+4. Ton style doit être punchy, rythmé et légèrement insolent.
+5. Pas d'emojis, pas de titres, pas de formatage.
+6. Longueur : 2 à 4 phrases maximum.
+7. Mets du HYPE autour du duel ou de l'événement.
+8. Si possible, ajoute un contexte sympa (rivalité, anniversaire, revanche, série en cours).
+9. Termine par une phrase qui donne envie de regarder.
 
-═══ TOP 5 À NE PAS RATER CETTE SEMAINE ═══
+═══ TOP ÉVÉNEMENTS À SURVEILLER ═══
 {must_watch}
 
 ═══ PROGRAMME DE LA SEMAINE ═══
 {events_summary}
 
-═══ ACTUALITÉS ═══
+═══ ACTUALITÉS SPORTIVES ═══
 {news_summary}
 
-RÉDIGE MAINTENANT TON RÉSUMÉ :"""
+RÉDIGE L'ACTU PUNCHY MAINTENANT :"""

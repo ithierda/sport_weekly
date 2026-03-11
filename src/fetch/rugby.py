@@ -41,4 +41,4 @@ def fetch_rugby_news(config: dict) -> list[dict]:
     articles = []
     for slug in ["270559", "271937"]:
         articles.extend(espn.news("rugby", slug, limit=3))
-    return [{"title": a.get("headline", ""), "url": a.get("links", {}).get("web", {}).get("href", "")} for a in articles[:5]]
+    return [{"title": a.get("headline", ""), "url": a.get("links", {}).get("web", {}).get("href", ""), "published": a.get("published", "")} for a in articles[:5]]

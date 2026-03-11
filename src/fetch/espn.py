@@ -5,12 +5,14 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from zoneinfo import ZoneInfo
 
 import requests
 
 logger = logging.getLogger(__name__)
 
 TIMEOUT = 30
+PARIS_TZ = ZoneInfo("Europe/Paris")
 
 
 @dataclass
@@ -73,7 +75,7 @@ class ESPNClient:
         events: list[SportEvent] = []
         for ev in data.get("events", []):
             try:
-                dt = datetime.fromisoformat(ev["date"].replace("Z", "+00:00"))
+                dt = datetime.fromisoformat(ev["date"].replace("Z", "+00:00")).astimezone(PARIS_TZ)
             except (KeyError, ValueError):
                 continue
 

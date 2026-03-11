@@ -1,5 +1,5 @@
 {
-    "name": "Baptiste",
+    "name": "Ithier",
     "email": "ithier.da@gmail.com",
     "sports": {
         "football": {
@@ -11,7 +11,7 @@
             "teams": ["France", "Stade Français", "Racing 92"]
         },
         "nba": {
-            "follow_league": true,
+            "follow_league": false,
             "players": ["Victor Wembanyama"]
         },
         "tennis": {
