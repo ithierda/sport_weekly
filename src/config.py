@@ -13,5 +13,5 @@ class Config:
     MAIL_SMTP_PASSWORD = os.getenv("MAIL_SMTP_PASSWORD")
 
     HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-    MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Meta-Llama-3-8B-Instruct")
-    MAX_TOKENS = int(os.getenv("MAX_TOKENS") or 3000)
+    MODEL_ID = os.getenv("MODEL_ID", "mistralai/Mistral-7B-Instruct-v0.3")
+    MAX_TOKENS = int(os.getenv("MAX_TOKENS", 3000))

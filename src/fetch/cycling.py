@@ -1,6 +1,9 @@
 """Cycling fetcher — CyclingNews RSS for race stages & news."""
 
+from __future__ import annotations
+
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -26,6 +29,26 @@ RACE_KEYWORDS = [
 
 MONUMENTS = ["Milan-San Remo", "Tour des Flandres", "Paris-Roubaix", "Liège-Bastogne-Liège", "Il Lombardia"]
 GRAND_TOURS = ["Tour de France", "Giro d'Italia", "Vuelta a España"]
+
+
+def _extract_stage_number(title: str) -> int | None:
+    """Extract stage number from a cycling article title.
+
+    Handles patterns like:
+      "Paris-Nice: stage 4 results — ..."
+      "Stage 5 winner — Tirreno"
+      "4th stage — ..."
+      "étape 3 — ..."
+    """
+    title_l = title.lower()
+    # Patterns: "stage 4", "stage four", "étape 4", "4th stage", "stage 12"
+    m = re.search(r"(?:stage|étape|etape)\s+(\d{1,2})\b", title_l)
+    if m:
+        return int(m.group(1))
+    m2 = re.search(r"\b(\d{1,2})(?:st|nd|rd|th|e|ème|eme)?\s+(?:stage|étape|etape)\b", title_l)
+    if m2:
+        return int(m2.group(1))
+    return None
 
 
 def _extract_race_name(title: str) -> str:
@@ -66,8 +89,9 @@ def fetch_cycling(config: dict, date_range: str) -> list[SportEvent]:
                 if not race_name:
                     race_name = "Cyclisme"
 
-            # Avoid duplicates on same race
-            dedup_key = f"{race_name}"
+            # Avoid duplicates on same race+stage
+            stage_num = _extract_stage_number(title)
+            dedup_key = f"{race_name}-stage{stage_num}" if stage_num else f"{race_name}"
             if dedup_key in seen_titles and len(events) > 3:
                 continue
             seen_titles.add(dedup_key)
@@ -83,12 +107,18 @@ def fetch_cycling(config: dict, date_range: str) -> list[SportEvent]:
             is_grand_tour = any(gt.lower() in race_name.lower() for gt in GRAND_TOURS)
             rider_mentioned = any(r in title_lower for r in riders)
 
+            # Build clean event title
+            if stage_num:
+                event_title = f"Étape {stage_num} — {race_name}"
+            else:
+                event_title = race_name
+
             events.append(SportEvent(
                 sport="Cyclisme",
                 league=race_name,
                 league_emoji="🚴",
                 date=dt,
-                title=title,
+                title=event_title,
                 status="upcoming",
                 is_must_watch=is_monument or is_grand_tour or rider_mentioned,
                 details="Monument" if is_monument else ("Grand Tour" if is_grand_tour else ""),

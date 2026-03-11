@@ -34,6 +34,7 @@ BIATHLON_DISCIPLINES = {
     "SR": "Relais",
 }
 
+# Typical FIS race start times (Paris/CET) by discipline
 FIS_DISCIPLINES = {
     "DH": "Descente",
     "SG": "Super-G",
@@ -41,6 +42,16 @@ FIS_DISCIPLINES = {
     "SL": "Slalom",
     "AC": "Combiné",
     "PGS": "Géant Parallèle",
+}
+
+# Typical FIS race start times (Paris/CET) by discipline
+FIS_TYPICAL_TIMES: dict[str, tuple[int, int]] = {
+    "DH":  (11, 30),   # Descente
+    "SG":  (11, 30),   # Super-G
+    "GS":  (10,  0),   # Géant — Manche 1
+    "SL":  (10,  0),   # Slalom — Manche 1
+    "AC":  (10, 30),   # Combiné
+    "PGS": (11,  0),   # Géant parallèle
 }
 
 
@@ -238,16 +249,28 @@ def fetch_ski_alpine(config: dict, date_range: str) -> list[SportEvent]:
                 disc_label = FIS_DISCIPLINES.get(disc_code, disc_code)
                 title = f"{disc_label} {gender} — {location}" if gender else f"{disc_label} — {location}"
 
+                # Assign typical race start time in Paris timezone
+                h, m = FIS_TYPICAL_TIMES.get(disc_code, (0, 0))
+                if h > 0:
+                    race_dt = event_start.astimezone(PARIS_TZ).replace(hour=h, minute=m, second=0, microsecond=0)
+                else:
+                    race_dt = event_start
+
+                # For GS/SL, add both runs in round_info
+                run_info = ""
+                if disc_code in ("GS", "SL"):
+                    run_info = "Man.1 : 10h00  |  Man.2 : 13h30"
+
                 events.append(SportEvent(
                     sport="Ski Alpin",
                     league="Coupe du Monde FIS",
                     league_emoji="⛷️",
-                    date=event_start,
+                    date=race_dt,
                     title=title,
                     status="upcoming",
                     venue=f"{location} ({country})",
                     is_must_watch=True,
-                    round_info=f"Coupe du Monde — {disc_label}",
+                    round_info=run_info if run_info else f"Coupe du Monde — {disc_label}",
                 ))
 
     except Exception as e:

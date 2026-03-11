@@ -18,6 +18,7 @@ from src.fetch.winter_sports import fetch_biathlon, fetch_ski_alpine, fetch_wint
 from src.fetch.sailing import fetch_sailing, fetch_sailing_news
 from src.fetch.endurance import fetch_trail, fetch_athletics, fetch_swimming, fetch_endurance_news
 from src.fetch.olympics import fetch_olympics, fetch_olympics_news
+from src.fetch.google_news import fetch_french_sport_news
 from src.model.hf_client import generate, build_weekly_prompt
 from src.send.render import render_newsletter
 from src.send.mailer import send_mail
@@ -178,7 +179,18 @@ def run_for_user(user_config: dict, dry_run: bool = False):
         except Exception as e:
             logger.warning("Failed to fetch %s news: %s", sport_key, e)
 
-    logger.info("Total: %d events, %d news items", len(all_events), len(all_news))
+    logger.info("Total: %d events, %d news items (from sport fetchers)", len(all_events), len(all_news))
+
+    # Replace ESPN news with fresh French sport news from Google News RSS
+    try:
+        gnews = fetch_french_sport_news(user_sports=sports)
+        if gnews:
+            all_news = gnews
+            logger.info("Google News: %d French sport articles fetched", len(gnews))
+    except Exception as e:
+        logger.warning("Google News aggregation failed: %s", e)
+
+    logger.info("Total: %d events, %d news items (final)", len(all_events), len(all_news))
 
     # Generate AI summary
     ai_summary = ""

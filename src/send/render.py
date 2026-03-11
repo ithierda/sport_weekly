@@ -134,7 +134,7 @@ def _render_day_events(day_label: str, events: list[SportEvent]) -> str:
                 match_line = f"{ev.home_team} {score} {ev.away_team}" if ev.home_team else ev.title
                 badge = '<span style="display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; background:#e8f5e9; color:#2e7d32; font-weight:600;">TERMINÉ</span>'
             elif ev.status == "upcoming":
-                match_line = f"{ev.away_team} @ {ev.home_team}" if ev.home_team and ev.away_team else ev.title
+                match_line = f"{ev.home_team} - {ev.away_team}" if ev.home_team and ev.away_team else ev.title
                 badge = f'<span style="display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; background:#e3f2fd; color:#1565c0; font-weight:600;">{time_str}</span>' if time_str else ''
             else:
                 match_line = ev.title
@@ -332,14 +332,16 @@ def render_newsletter(
                         date_label = pub[:16] if len(pub) > 16 else pub
 
             date_html = f'<span style="font-size:11px; color:#999; margin-left:6px;">{date_label}</span>' if date_label else ''
+            source = n.get("source", "")
+            source_html = f'<span style="font-size:10px; color:#1a237e; font-weight:600; margin-left:6px;">[{source}]</span>' if source else ''
             if url:
                 html += f"""
                 <div class="news-item">
-                    <a href="{url}">{title}</a>{date_html}
+                    <a href="{url}">{title}</a>{source_html}{date_html}
                 </div>"""
             elif title:
                 html += f"""
-                <div class="news-item">{title}{date_html}</div>"""
+                <div class="news-item">{title}{source_html}{date_html}</div>"""
         html += """
             </div>"""
 

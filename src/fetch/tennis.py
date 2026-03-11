@@ -1,7 +1,11 @@
 """Tennis fetcher — Grand Slams, Masters 1000, top players."""
 
 import logging
+import urllib.parse
 from datetime import datetime, timezone
+
+import feedparser
+
 from src.fetch.espn import espn, SportEvent
 
 logger = logging.getLogger(__name__)
@@ -54,21 +58,56 @@ def fetch_tennis(config: dict, date_range: str) -> list[SportEvent]:
                 details=detail,
             ))
 
-    # Check news for player-specific updates
-    articles = espn.news("tennis", "atp", limit=10)
-    for a in articles:
-        headline = a.get("headline", "").lower()
-        if player_filter and any(p in headline for p in player_filter):
+    # Add player-specific match news from Google News
+    all_players = list({p.lower() for p in player_filter} | {"fils", "djokovic", "sinner", "alcaraz"})
+    events.extend(_fetch_tennis_match_news(all_players))
+
+    return events
+
+
+def _fetch_tennis_match_news(players: list[str]) -> list[SportEvent]:
+    """Use Google News RSS to surface recent match results/previews for watched players."""
+    events: list[SportEvent] = []
+    seen_titles: set[str] = set()
+
+    # Build a query targeting watched players + Arthur Fils
+    highlight_players = list({p.lower() for p in players} | {"arthur fils", "fils"})
+    query_parts = [f'"{p}"' for p in highlight_players[:4]]
+    query = " OR ".join(query_parts) + " tennis"
+    url = "https://news.google.com/rss/search?q=" + urllib.parse.quote(query) + "&hl=fr&gl=FR&ceid=FR:fr"
+
+    try:
+        feed = feedparser.parse(url)
+        for entry in feed.entries[:8]:
+            title = entry.get("title", "")
+            link = entry.get("link", "")
+            if not title or title in seen_titles:
+                continue
+            # Strip source suffix like " - L'Équipe"
+            clean_title = title.split(" - ")[0].strip() if " - " in title else title
+            seen_titles.add(title)
+
+            pub = entry.get("published_parsed")
+            if pub:
+                dt = datetime(*pub[:6], tzinfo=timezone.utc)
+            else:
+                dt = datetime.now(tz=timezone.utc)
+
+            source = entry.get("source", {}).get("title", "")
+            title_lower = clean_title.lower()
+            is_fils = "fils" in title_lower
             events.append(SportEvent(
                 sport="Tennis",
                 league="ATP Tour",
                 league_emoji="🎾",
-                date=datetime.now(tz=timezone.utc),
-                title=f"📰 {a.get('headline', '')}",
+                date=dt,
+                title=f"📰 {clean_title}",
                 status="upcoming",
-                is_must_watch=True,
-                details="⭐ Joueur suivi",
+                is_must_watch=is_fils,
+                details=source,
             ))
+    except Exception as e:
+        logger.warning("Tennis Google News RSS failed: %s", e)
 
     return events
 
